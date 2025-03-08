@@ -1,2 +1,2 @@
-# This file ensures GitHub Pages doesn't process your site with Jekyll
+# This file prevents GitHub Pages from ignoring files that begin with an underscore
 

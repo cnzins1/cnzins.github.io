@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clever | Portal</title>
+  <link rel="icon" href="https://resources.finalsite.net/images/f_auto,q_auto/v1689877141/mooreschoolscom/emadd6nvplrnh1vsswjf/Clever-Logo.jpg">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
+  <style>
+    /* Custom styles from globals.css */
+    .math-content {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+    }
+    
+    .math-content strong {
+      font-weight: 700;
+      color: #ffffff;
+      background-color: rgba(59, 130, 246, 0.1);
+      padding: 0 4px;
+      border-radius: 2px;
+    }
+    
+    .answer-section {
+      border-left: 2px solid #3b82f6;
+      padding-left: 8px;
+      margin: 8px 0;
+      font-weight: 500;
+    }
+    
+    sup {
+      vertical-align: super;
+      font-size: 0.75em;
+    }
+    
+    .fraction {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+    }
+    
+    .fraction .numerator {
+      display: block;
+      border-bottom: 1px solid;
+    }
+    
+    .fraction .denominator {
+      display: block;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+    
+    .animate-pulse {
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Additional styles for components */
+    .textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      resize: none;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    .button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .button-icon {
+      padding: 0.25rem;
+    }
+  </style>
+</head>
+<body class="font-sans">
+  <div id="app"></div>
+
+  <script>
+    // Mock API key function
+    function getApiKey() {
+      const dummy = [
+        "sk-proj-4VlygXNtWHYdo10Y",
+        "mezNPMyBv6OFGYMkgraqAxH4TtKenNU29CXTPNxrJgwQTEWGFMNuRK-75JT3",
+        "BlbkFJBbU0r1nOo-60IEj604_crOHa5SiIpYhHgUWHvld0FwsxNw6P4bXFxuYrOqEKnX1d6HD3WbZckA",
+      ];
+      return dummy.join("");
+    }
+
+    // Main application state
+    const state = {
+      messages: [],
+      input: "",
+      isLoading: false,
+      copied: null,
+      showDecoy: true
+    };
+
+    // Initialize the application
+    function initApp() {
+      document.title = "Clever | Portal";
+      renderApp();
+      
+      // Handle escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") {
+          state.showDecoy = !state.showDecoy;
+          renderApp();
+        }
+      });
+    }
+
+    // Render the application based on current state
+    function renderApp() {
+      const appContainer = document.getElementById('app');
+      
+      if (state.showDecoy) {
+        appContainer.innerHTML = `
+          <div class="w-full h-screen">
+            <img
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SCarOLqNwyc9CyEUu0CYMOeKMyypXF.png"
+              alt="Learning Management System"
+              class="w-full h-full object-cover"
+            />
+          </div>
+        `;
+      } else {
+        appContainer.innerHTML = `
+          <main class="flex min-h-screen flex-col bg-gray-900 text-gray-200">
+            <div class="flex-1 flex flex-col max-w-3xl mx-auto w-full p-4">
+              <div class="text-xs text-gray-500 mb-2 flex justify-between items-center">
+                <span>Study Notes</span>
+                <span class="text-xs opacity-50">Press ESC to switch views</span>
+              </div>
+
+              <div class="flex-1 overflow-y-auto mb-4 rounded-md bg-gray-800 p-2">
+                ${state.messages.length === 0 ? 
+                  `<div class="p-4 text-gray-500 text-sm">Enter your question...</div>` : 
+                  `<div class="space-y-4">
+                    ${state.messages.map((message, index) => `
+                      <div class="p-3 rounded text-sm ${
+                        message.role === "user" ? "bg-gray-700 ml-8" : "bg-gray-900 border border-gray-700 mr-8"
+                      }">
+                        <div class="flex justify-between items-start">
+                          <div class="whitespace-pre-wrap math-content">
+                            ${message.content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")}
+                          </div>
+
+                          ${message.role === "assistant" ? `
+                            <button 
+                              class="button button-icon h-6 w-6 text-gray-500 hover:text-gray-300"
+                              onclick="copyToClipboard('${encodeURIComponent(message.content)}', ${index})"
+                            >
+                              ${state.copied === index ? 
+                                `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><polyline points="20 6 9 17 4 12"></polyline></svg>` : 
+                                `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`
+                              }
+                            </button>
+                          ` : ''}
+                        </div>
+                      </div>
+                    `).join('')}
+
+                    ${state.isLoading ? `
+                      <div class="p-3 rounded-lg bg-gray-900 border border-gray-700 mr-8 text-sm">
+                        <div class="flex space-x-2">
+                          <div class="w-2 h-2 rounded-full bg-gray-500 animate-pulse"></div>
+                          <div class="w-2 h-2 rounded-full bg-gray-500 animate-pulse" style="animation-delay: 0.2s"></div>
+                          <div class="w-2 h-2 rounded-full bg-gray-500 animate-pulse" style="animation-delay: 0.4s"></div>
+                        </div>
+                      </div>
+                    ` : ''}
+                  </div>`
+                }
+                <div id="messagesEnd"></div>
+              </div>
+
+              <form onsubmit="handleSubmit(event)" class="relative">
+                <textarea
+                  id="inputField"
+                  placeholder="Type here..."
+                  class="resize-none bg-gray-800 border-gray-700 text-gray-200 focus:border-gray-600 h-24 w-full p-2 rounded"
+                  ${state.isLoading ? 'disabled' : ''}
+                  onkeydown="handleKeyDown(event)"
+                >${state.input}</textarea>
+                <button
+                  type="submit"
+                  class="absolute bottom-2 right-2 bg-gray-700 hover:bg-gray-600 text-xs px-2 py-1 h-auto rounded"
+                  ${state.isLoading || !state.input.trim() ? 'disabled' : ''}
+                >
+                  Send
+                </button>
+              </form>
+            </div>
+          </main>
+        `;
+
+        // Update textarea value
+        const inputField = document.getElementById('inputField');
+        if (inputField) {
+          inputField.value = state.input;
+        }
+      }
+    }
+
+    // Handle form submission
+    function handleSubmit(e) {
+      e.preventDefault();
+      if (!state.input.trim()) return;
+
+      // Add user message
+      state.messages.push({ role: "user", content: state.input });
+      const userInput = state.input;
+      state.input = "";
+      state.isLoading = true;
+      renderApp();
+
+      // Scroll to bottom
+      setTimeout(() => {
+        const messagesEnd = document.getElementById('messagesEnd');
+        if (messagesEnd) {
+          messagesEnd.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+
+      // Simulate API call
+      fetchResponse(userInput);
+    }
+
+    // Handle key press in textarea
+    function handleKeyDown(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        if (form && state.input.trim()) {
+          handleSubmit({ preventDefault: () => {} });
+        }
+      } else {
+        // Update input state
+        state.input = e.target.value;
+      }
+    }
+
+    // Copy text to clipboard
+    function copyToClipboard(encodedText, index) {
+      const text = decodeURIComponent(encodedText);
+      // Extract only the answer part
+      const answerMatch = text.match(/\*\*Answer:\*\*\s*\n(.*?)(\n\n|\n$|$)/s);
+      const answerText = answerMatch ? answerMatch[1].trim() : text;
+
+      // Create a temporary textarea to copy the text
+      const textarea = document.createElement('textarea');
+      textarea.value = answerText;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+
+      // Update state to show copied indicator
+      state.copied = index;
+      renderApp();
+      
+      // Reset copied indicator after 2 seconds
+      setTimeout(() => {
+        state.copied = null;
+        renderApp();
+      }, 2000);
+    }
+
+    // Fetch response from API (simulated for GitHub Pages)
+    function fetchResponse(userInput) {
+      // For GitHub Pages, we'll simulate a response since we can't make actual API calls
+      // In a real implementation, this would be a fetch to the OpenAI API
+      
+      setTimeout(() => {
+        // Simulate API response
+        const responses = {
+          "What is the quadratic formula?": `**Answer:**
+x = (-b ± √(b² - 4ac)) / 2a
+
+The quadratic formula is used to solve quadratic equations in the form ax² + bx + c = 0, where a, b, and c are coefficients and a ≠ 0.
+
+To use the formula:
+1. Identify the values of a, b, and c from your equation
+2. Substitute these values into the formula
+3. Calculate the discriminant (b² - 4ac)
+4. Find both solutions (using + and - with the square root)`,
+
+          "How do you solve 2x + 5 = 13?": `**Answer:**
+x = 4
+
+To solve this equation:
+1. Subtract 5 from both sides: 2x + 5 - 5 = 13 - 5
+2. Simplify: 2x = 8
+3. Divide both sides by 2: 2x/2 = 8/2
+4. Simplify to get: x = 4
+
+You can verify this by substituting x = 4 back into the original equation:
+2(4) + 5 = 8 + 5 = 13 ✓`,
+
+          "What is the derivative of sin(x)?": `**Answer:**
+The derivative of sin(x) is cos(x)
+
+This is one of the fundamental derivatives in calculus. 
+
+To verify this:
+1. Use the definition of the derivative: f'(x) = lim(h→0) [f(x+h) - f(x)]/h
+2. For sin(x), this becomes: lim(h→0) [sin(x+h) - sin(x)]/h
+3. Using trigonometric identities and limits, this evaluates to cos(x)
+
+This means that the rate of change of sin(x) at any point is given by cos(x).`
+        };
+
+        // Get a response based on input or use default
+        let assistantMessage;
+        const exactMatch = responses[userInput];
+        
+        if (exactMatch) {
+          assistantMessage = exactMatch;
+        } else {
+          // Default response for any other input
+          assistantMessage = `**Answer:**
+I'll help with that math problem.
+
+I've processed your question but since this is a static demo, I can only provide pre-programmed responses. In the actual application, this would connect to the OpenAI API to generate a real response to your specific question.
+
+Try asking about:
+- The quadratic formula
+- How to solve 2x + 5 = 13
+- The derivative of sin(x)`;
+        }
+
+        // Add assistant message
+        state.messages.push({ role: "assistant", content: assistantMessage });
+        state.isLoading = false;
+        renderApp();
+
+        // Scroll to bottom
+        setTimeout(() => {
+          const messagesEnd = document.getElementById('messagesEnd');
+          if (messagesEnd) {
+            messagesEnd.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 100);
+      }, 1500); // Simulate API delay
+    }
+
+    // Initialize the app when the page loads
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
+
