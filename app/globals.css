@@ -2,81 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 47.4% 11.2%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
-/* Chat formatting styles */
-.chat-content {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
-    "Helvetica Neue", sans-serif;
+/* Math content styling */
+.math-content {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
 }
 
-.formatted-text {
-  line-height: 1.4;
-  font-size: 1rem;
+/* Improve bold text styling */
+.math-content strong {
+  font-weight: 700;
+  color: #ffffff;
+  background-color: rgba(59, 130, 246, 0.1);
+  padding: 0 4px;
+  border-radius: 2px;
 }
 
-.formatted-text strong {
-  font-weight: 600;
-}
-
-.formatted-text sup {
-  font-size: 0.75em;
-  vertical-align: super;
-  line-height: 0;
-}
-
-.formatted-text sub {
-  font-size: 0.75em;
-  vertical-align: sub;
-  line-height: 0;
-}
-
-/* Make sure superscripts and subscripts are properly selectable and copyable */
-.formatted-text sup,
-.formatted-text sub {
-  position: relative;
-  display: inline-block;
-  user-select: text;
-}
-
-/* Styling for lists */
-.formatted-text ul,
-.formatted-text ol {
-  margin: 0.25rem 0;
-  padding-left: 0.75rem;
-}
-
-.formatted-text li {
-  margin-bottom: 0.125rem;
-}
-
-/* Styling for headings */
-.formatted-text h3 {
-  margin-top: 0.5rem;
-  margin-bottom: 0.25rem;
-  color: #93c5fd;
-}
-
-/* Styling for paragraphs */
-.formatted-text p {
-  margin-bottom: 0.375rem;
-}
-
-/* Styling for <br> tags */
-.formatted-text br {
-  line-height: 1.2;
-}
-
-/* Answer section styling */
+/* Add styling for the answer section */
 .answer-section {
-  position: relative;
+  border-left: 2px solid #3b82f6;
+  padding-left: 8px;
+  margin: 8px 0;
+  font-weight: 500;
+}
+
+/* Superscript styling */
+sup {
+  vertical-align: super;
+  font-size: 0.75em;
+}
+
+/* Fraction styling */
+.fraction {
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.fraction .numerator {
+  display: block;
+  border-bottom: 1px solid;
+}
+
+.fraction .denominator {
+  display: block;
+}
+
+/* Animation for typing indicator */
+@keyframes pulse {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 1.5s infinite;
 }
 
