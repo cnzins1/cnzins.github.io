@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+}
+
+/* Chat formatting styles */
+.chat-content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+    "Helvetica Neue", sans-serif;
+}
+
+.formatted-text {
+  line-height: 1.4;
+  font-size: 1rem;
+}
+
+.formatted-text strong {
+  font-weight: 600;
+}
+
+.formatted-text sup {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+.formatted-text sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+  line-height: 0;
+}
+
+/* Make sure superscripts and subscripts are properly selectable and copyable */
+.formatted-text sup,
+.formatted-text sub {
+  position: relative;
+  display: inline-block;
+  user-select: text;
+}
+
+/* Styling for lists */
+.formatted-text ul,
+.formatted-text ol {
+  margin: 0.25rem 0;
+  padding-left: 0.75rem;
+}
+
+.formatted-text li {
+  margin-bottom: 0.125rem;
+}
+
+/* Styling for headings */
+.formatted-text h3 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  color: #93c5fd;
+}
+
+/* Styling for paragraphs */
+.formatted-text p {
+  margin-bottom: 0.375rem;
+}
+
+/* Styling for <br> tags */
+.formatted-text br {
+  line-height: 1.2;
+}
+
+/* Answer section styling */
+.answer-section {
+  position: relative;
+}
+
