@@ -131,7 +131,7 @@
         appContainer.innerHTML = `
           <div class="w-full h-screen">
             <img
-              src="https://cdn.discordapp.com/attachments/1130614336860205088/1347860592701997097/c9ztQVd.png?ex=67cd5c7f&is=67cc0aff&hm=78b6444fa7885ac50054ea3799b987ca5ac3b8b49669ec50dd3f2770fc8518a9&"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-SCarOLqNwyc9CyEUu0CYMOeKMyypXF.png"
               alt="Learning Management System"
               class="w-full h-full object-cover"
             />
@@ -188,16 +188,16 @@
                 <div id="messagesEnd"></div>
               </div>
 
-              <form onsubmit="handleSubmit(event)" class="relative">
+              <form id="chatForm" class="relative">
                 <textarea
                   id="inputField"
                   placeholder="Type here..."
                   class="resize-none bg-gray-800 border-gray-700 text-gray-200 focus:border-gray-600 h-24 w-full p-2 rounded"
                   ${state.isLoading ? 'disabled' : ''}
-                  onkeydown="handleKeyDown(event)"
                 >${state.input}</textarea>
                 <button
                   type="submit"
+                  id="sendButton"
                   class="absolute bottom-2 right-2 bg-gray-700 hover:bg-gray-600 text-xs px-2 py-1 h-auto rounded"
                   ${state.isLoading || !state.input.trim() ? 'disabled' : ''}
                 >
@@ -208,18 +208,50 @@
           </main>
         `;
 
-        // Update textarea value
+        // Update textarea value and attach event listeners
         const inputField = document.getElementById('inputField');
+        const chatForm = document.getElementById('chatForm');
+        
         if (inputField) {
           inputField.value = state.input;
+          
+          // Handle input changes
+          inputField.addEventListener('input', function(e) {
+            state.input = e.target.value;
+            
+            // Update send button disabled state
+            const sendButton = document.getElementById('sendButton');
+            if (sendButton) {
+              sendButton.disabled = state.isLoading || !state.input.trim();
+            }
+          });
+          
+          // Handle Enter key
+          inputField.addEventListener('keydown', function(e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (state.input.trim() && !state.isLoading) {
+                handleSubmit();
+              }
+            }
+          });
+        }
+        
+        // Handle form submission
+        if (chatForm) {
+          chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (state.input.trim() && !state.isLoading) {
+              handleSubmit();
+            }
+          });
         }
       }
     }
 
     // Handle form submission
-    function handleSubmit(e) {
-      e.preventDefault();
-      if (!state.input.trim()) return;
+    function handleSubmit() {
+      if (!state.input.trim() || state.isLoading) return;
 
       // Add user message
       state.messages.push({ role: "user", content: state.input });
@@ -236,22 +268,8 @@
         }
       }, 100);
 
-      // Make actual API call to OpenAI
+      // Make API call to OpenAI
       fetchOpenAIResponse(userInput);
-    }
-
-    // Handle key press in textarea
-    function handleKeyDown(e) {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        const form = e.target.closest('form');
-        if (form && state.input.trim()) {
-          handleSubmit({ preventDefault: () => {} });
-        }
-      } else {
-        // Update input state
-        state.input = e.target.value;
-      }
     }
 
     // Copy text to clipboard
@@ -280,7 +298,7 @@
       }, 2000);
     }
 
-    // Make actual API call to OpenAI
+    // Make API call to OpenAI
     async function fetchOpenAIResponse(userInput) {
       try {
         // Prepare conversation history for the API
@@ -308,14 +326,13 @@ IMPORTANT: Always format your final answer in this specific way:
 2. Put the actual answer on the next line, clearly and concisely
 3. Then add a blank line before starting your explanation`
           },
-          ...state.messages.map(msg => ({
+          ...state.messages.filter(msg => msg.role === "user" || msg.role === "assistant").map(msg => ({
             role: msg.role,
             content: msg.content
-          })),
-          { role: "user", content: userInput }
+          }))
         ];
 
-        // Make direct API call to OpenAI
+        // Make API call to OpenAI
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -369,4 +386,3 @@ IMPORTANT: Always format your final answer in this specific way:
   </script>
 </body>
 </html>
-
